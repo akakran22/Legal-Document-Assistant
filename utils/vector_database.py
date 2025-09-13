@@ -28,10 +28,10 @@ class VectorDB:
         embs = embeddings.get_or_build(
             texts=texts,
             vector_dir=self.vector_dir,
-            batch_size=32,            # safe on CPU; adjust if you have more RAM/cores
-            normalize=True,           # keep normalized for cosine
+            batch_size=32,           
+            normalize=True,          
             show_progress=True,
-            cache_name=cache_name,    # e.g., "embeddings_all_mpnet_base_v2.npz"
+            cache_name=cache_name,   
             force_recompute=force_recompute
         ).astype(np.float32)
 
@@ -58,7 +58,6 @@ class VectorDB:
         self.texts = data["texts"]
         self.metas = data["metas"]
         self.dim   = data.get("dim", None)
-        # Good recall at query time:
         try:
             self.index.hnsw.efSearch = 128
         except Exception:
@@ -67,19 +66,6 @@ class VectorDB:
     def set_search_params(self, ef_search: int = None):
         if ef_search is not None:
             self.index.hnsw.efSearch = ef_search
-
-    # def search(self, query_emb: np.ndarray, top_k=6):
-    #     D, I = self.index.search(query_emb.astype(np.float32), top_k)
-    #     hits = []
-    #     for r, idx in enumerate(I[0]):
-    #         hits.append({
-    #             "rank": r+1,
-    #             "score": float(D[r]),
-    #             "text": self.texts[idx],
-    #             "meta": self.metas[idx]
-    #         })
-    #     return hits
-
 
     def search(self, query_emb: np.ndarray, top_k=6):
         # Ensure 2D float32 (nq, d)
@@ -115,6 +101,7 @@ class VectorDB:
                 "meta": self.metas[idx]
             })
         return hits
+
 
 
 
