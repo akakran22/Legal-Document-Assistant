@@ -1,87 +1,3 @@
-# # utils/retrieval_qa.py
-# from groq import Groq
-# from .create_embeddings import Embeddings
-
-# MODEL_NAME = "llama-3.3-70b-versatile"
-
-# class RetrievalQA:
-#     def __init__(self, vectordb, embed_model_name="sentence-transformers/all-mpnet-base-v2"):
-#         self.vdb = vectordb
-#         self.embeddings = Embeddings(embed_model_name)
-#         self.client = Groq()  # reads GROQ_API_KEY from env
-
-#     def ask(self, query: str, top_k=6, max_tokens=800, temperature=0.2):
-#         # 1) Encode the query; ensure 2D shape (1, dim)
-#         q_emb = self.embeddings.encode([query], normalize=True, show_progress=False)
-#         if q_emb.ndim != 2 or q_emb.shape[0] != 1:
-#             # Defensive guard: make sure it is (1, dim)
-#             q_emb = q_emb.reshape(1, -1)
-
-#         # 2) Retrieve
-#         hits = self.vdb.search(q_emb, top_k=top_k)
-
-#         # 3) Build context from hits (handle empty results)
-#         if not hits:
-#             context = "No relevant context found in the indexed documents."
-#         else:
-#             context = "\n\n".join([f"[{h['rank']}] {h['text']}" for h in hits])
-
-#         # 4) Compose prompts
-#         system_prompt = (
-#             "You are a legal assistant. Answer based strictly on the provided Indian law context. "
-#             "Cite relevant sections if present; if unclear, say you cannot find it in the context."
-#         )
-#         user_prompt = f"Question: {query}\n\nContext:\n{context}"
-
-#         # 5) Call LLM
-#         completion = self.client.chat.completions.create(
-#             model=MODEL_NAME,
-#             messages=[
-#                 {"role": "system", "content": system_prompt},
-#                 {"role": "user", "content": user_prompt},
-#             ],
-#             temperature=temperature,
-#             max_tokens=max_tokens,
-#         )
-
-#         answer = completion.choices[0].message.content if completion.choices else ""
-#         return answer, hits
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# utils/retrieval_qa.py
 from groq import Groq
 from .create_embeddings import Embeddings
 
@@ -94,16 +10,12 @@ class RetrievalQA:
         self.client = Groq()  # reads GROQ_API_KEY from env
 
     def ask(self, query: str, top_k=6, max_tokens=1000, temperature=0.2):
-        # 1) Encode the query; ensure 2D shape (1, dim)
         q_emb = self.embeddings.encode([query], normalize=True, show_progress=False)
         if q_emb.ndim != 2 or q_emb.shape[0] != 1:
-            # Defensive guard: make sure it is (1, dim)
             q_emb = q_emb.reshape(1, -1)
 
-        # 2) Retrieve
         hits = self.vdb.search(q_emb, top_k=top_k)
 
-        # 3) Build context from hits (handle empty results)
         if not hits:
             context = "No relevant context found in the indexed documents."
         else:
@@ -139,7 +51,6 @@ Please provide a comprehensive, well-structured answer based on the following le
 
 Ensure your response is professionally formatted, easy to read, and includes all relevant legal citations and sections mentioned in the context."""
 
-        # 5) Call LLM with increased token limit for better responses
         completion = self.client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
@@ -152,3 +63,4 @@ Ensure your response is professionally formatted, easy to read, and includes all
 
         answer = completion.choices[0].message.content if completion.choices else ""
         return answer, hits
+
